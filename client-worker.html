@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#118EEA">
+  <meta name="referrer" content="no-referrer">
+  <title>Proteksi Link Canggih</title>
+</head>
+<body>
+  <h1>Proteksi Link dengan Worker</h1>
+  <p>Script ini bekerja di latar belakang untuk menjaga link tetap aman.</p>
+
+  <!-- Worker Initializer -->
+  <script>
+    // URL terenkripsi menggunakan Base64
+    const protectedURLs = [
+      "aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20vc2FmZWxpbmsx",
+      "aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20vc2FmZWxpbmsy"
+    ];
+
+    // Inisialisasi worker
+    const workerScript = `
+      // Dekripsi URL
+      function decodeBase64(encoded) {
+        try {
+          return atob(encoded);
+        } catch (e) {
+          console.error("Dekripsi gagal:", e);
+          return null;
+        }
+      }
+
+      // Fungsi utama worker untuk memuat URL secara tersembunyi
+      function loadURL(url) {
+        if (!url) return;
+        const iframe = document.createElement('iframe');
+        iframe.src = url;
+        iframe.style.display = 'none';
+        iframe.style.width = '1px';
+        iframe.style.height = '1px';
+        document.body.appendChild(iframe);
+      }
+
+      // Pesan dari main thread
+      onmessage = function(event) {
+        const urls = event.data;
+        urls.forEach((encoded, index) => {
+          const decryptedURL = decodeBase64(encoded);
+          setTimeout(() => loadURL(decryptedURL), index * 3000); // Delay antar URL
+        });
+      };
+    `;
+
+    // Membuat Blob URL untuk worker
+    const blob = new Blob([workerScript], { type: "application/javascript" });
+    const worker = new Worker(URL.createObjectURL(blob));
+
+    // Kirim data URL ke worker
+    worker.postMessage(protectedURLs);
+  </script>
+</body>
+</html>

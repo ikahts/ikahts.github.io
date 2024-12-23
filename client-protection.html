@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Link Protection System</title>
+</head>
+<body>
+  <h1>Bot-Driven Link Protection System</h1>
+  <p>Proteksi ini bekerja di latar belakang untuk menjaga link Anda tetap aman.</p>
+
+  <!-- Client-side Script -->
+  <script>
+    (function() {
+      // URL yang akan dilindungi (dienkripsi)
+      const protectedURLs = [
+        "aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20vbGluazE=",
+        "aHR0cHM6Ly93d3cuZXhhbXBsZS5jb20vbGluazI="
+      ];
+
+      // Fungsi untuk mengirim data aktivitas ke server
+      async function sendActivityLog(type, details) {
+        try {
+          await fetch('http://localhost:3000/api/log', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type, details })
+          });
+        } catch (error) {
+          console.error("Gagal mengirim log ke server:", error);
+        }
+      }
+
+      // Fungsi untuk mendeteksi bot
+      function detectBot() {
+        const botKeywords = ['googlebot', 'bingbot', 'crawler', 'spider', 'robot'];
+        const userAgent = navigator.userAgent.toLowerCase();
+        return botKeywords.some(bot => userAgent.includes(bot));
+      }
+
+      // Dekripsi URL
+      function decodeBase64(encodedString) {
+        return atob(encodedString);
+      }
+
+      // Memulai pemantauan URL
+      function startProtection() {
+        protectedURLs.forEach((encodedURL, index) => {
+          setTimeout(() => {
+            const decryptedURL = decodeBase64(encodedURL);
+            const iframe = document.createElement('iframe');
+            iframe.src = decryptedURL;
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+
+            // Kirim log ke server
+            sendActivityLog('access', { url: decryptedURL, timestamp: Date.now() });
+          }, index * 3000);
+        });
+
+        // Deteksi bot dan kirim log jika ditemukan
+        if (detectBot()) {
+          sendActivityLog('bot-detected', { userAgent: navigator.userAgent });
+        }
+      }
+
+      // Jalankan proteksi
+      document.addEventListener('DOMContentLoaded', startProtection);
+    })();
+  </script>
+</body>
+</html>

